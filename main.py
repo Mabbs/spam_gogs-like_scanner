@@ -2,8 +2,10 @@ import asyncio
 from curl_cffi import requests
 from urllib.parse import urlparse
 
-BASE_URL = "https://repo.komhumana.org"
-checked_urls = set()
+BASE_URL = "https://gitea.mpc-web.jp"
+with open('gogs-like_instances.txt', 'r', encoding='utf-8') as f:
+    lines = f.readlines()
+checked_urls = set([line.strip().lower() for line in lines])
 
 def get_url_before_path(url):
     parsed = urlparse(url)
@@ -43,7 +45,7 @@ async def process_page(session, page):
     for spamlink in repo_links:
         if not spamlink:
             continue
-        linked_url = get_url_before_path(spamlink)
+        linked_url = get_url_before_path(spamlink).lower()
         if linked_url in checked_urls:
             continue
         checked_urls.add(linked_url)
@@ -64,7 +66,7 @@ async def main():
             async with semaphore:
                 await process_page(session, page)
 
-        await asyncio.gather(*(bounded_process(page) for page in range(1, 5020)))
+        await asyncio.gather(*(bounded_process(page) for page in range(1, 3334)))
 
 if __name__ == "__main__":
     asyncio.run(main())
